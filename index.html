@@ -1,0 +1,1831 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LOMAZY — Proteção de Marcas no Brasil</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+/* ===========================
+   RESET & BASE
+=========================== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --black: #0a0a0a;
+  --black2: #111111;
+  --black3: #161616;
+  --orange: #ff6a00;
+  --orange-light: #ff8533;
+  --orange-dim: rgba(255, 106, 0, 0.15);
+  --orange-glow: rgba(255, 106, 0, 0.4);
+  --white: #ffffff;
+  --gray: #888;
+  --gray-light: #aaa;
+  --border: rgba(255,255,255,0.07);
+  --border-orange: rgba(255, 106, 0, 0.3);
+  --font-display: 'Barlow Condensed', sans-serif;
+  --font-body: 'Barlow', sans-serif;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--black);
+  color: var(--white);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* ===========================
+   CANVAS BACKGROUND
+=========================== */
+#bg-canvas {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.4;
+}
+
+/* ===========================
+   NAVBAR
+=========================== */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  padding: 20px 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(to bottom, rgba(10,10,10,0.95), transparent);
+  backdrop-filter: blur(0px);
+  transition: backdrop-filter 0.3s, background 0.3s;
+}
+
+nav.scrolled {
+  background: rgba(10,10,10,0.95);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.logo-img {
+  height: 36px;
+  width: auto;
+  display: block;
+  object-fit: contain;
+}
+
+.logo-img--footer {
+  height: 30px;
+  opacity: 0.85;
+}
+
+.nav-cta {
+  background: var(--orange);
+  color: var(--white);
+  border: none;
+  padding: 10px 24px;
+  border-radius: 4px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s, transform 0.2s;
+  text-decoration: none;
+}
+
+.nav-cta:hover {
+  background: var(--orange-light);
+  box-shadow: 0 0 24px var(--orange-glow);
+  transform: translateY(-1px);
+}
+
+/* ===========================
+   HERO
+=========================== */
+#hero {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 90px 24px 32px;
+  text-align: center;
+  overflow: hidden;
+}
+
+/* Deep radial atmosphere */
+#hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 60% 55% at 50% 42%,
+      rgba(255,106,0,0.055) 0%,
+      rgba(255,106,0,0.018) 45%,
+      transparent 70%
+    );
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Hero energy canvas */
+#hero-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Star of David container */
+.hero-star-wrap {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(820px, 98vw);
+  height: min(820px, 98vw);
+  pointer-events: none;
+  z-index: 1;
+  will-change: transform;
+  transition: transform 0.12s ease-out;
+}
+
+.hero-star-svg {
+  width: 100%;
+  height: 100%;
+  animation: starBreathe 10s ease-in-out infinite;
+}
+
+@keyframes starBreathe {
+  0%, 100% { opacity: 1;   transform: scale(1);    }
+  50%       { opacity: 0.8; transform: scale(1.015); }
+}
+
+/* Energy edges — controlled via JS with getTotalLength */
+.star-edge {
+  opacity: 0;
+}
+
+/* All hero content above star */
+#hero > *:not(.hero-star-wrap):not(#hero-canvas) {
+  position: relative;
+  z-index: 2;
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255,106,0,0.1);
+  border: 1px solid var(--border-orange);
+  border-radius: 100px;
+  padding: 6px 16px;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--orange-light);
+  margin-bottom: 16px;
+  animation: fadeDown 0.8s ease both;
+}
+
+.hero-badge-dot {
+  width: 6px; height: 6px;
+  background: var(--orange);
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.7); }
+}
+
+h1 {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 3.2vw, 48px);
+  font-weight: 800;
+  line-height: 1.08;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  max-width: 620px;
+  margin-bottom: 12px;
+  animation: fadeDown 0.8s 0.1s ease both;
+}
+
+h1 em {
+  font-style: normal;
+  color: var(--orange);
+}
+
+.hero-sub {
+  font-size: 15px;
+  color: var(--gray-light);
+  max-width: 480px;
+  font-weight: 300;
+  margin-bottom: 24px;
+  animation: fadeDown 0.8s 0.2s ease both;
+}
+
+/* ===========================
+/* ===========================
+   SIMULATOR STAGES
+=========================== */
+.search-box {
+  width: 100%;
+  max-width: 680px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  padding: 24px;
+  animation: fadeDown 0.8s 0.3s ease both;
+}
+
+.sim-header { margin-bottom: 16px; }
+
+.sim-step-label {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--orange);
+  margin-bottom: 6px;
+}
+
+.sim-step-title {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--white);
+}
+
+#loading-brand-name { color: var(--orange); }
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gray);
+  margin-bottom: 6px;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 6px;
+  padding: 10px 14px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--white);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-group input::placeholder { color: rgba(255,255,255,0.25); }
+
+.form-group input:focus,
+.form-group select:focus {
+  border-color: var(--orange);
+  box-shadow: 0 0 0 3px rgba(255,106,0,0.12);
+}
+
+.form-group select { appearance: none; cursor: pointer; }
+.form-group select option { background: #1a1a1a; }
+
+.form-group input.invalid { border-color: rgba(255,60,60,0.6); }
+
+.field-error {
+  display: block;
+  font-size: 11px;
+  color: #ff5555;
+  margin-top: 4px;
+  font-weight: 500;
+}
+
+.form-submit {
+  width: 100%;
+  background: var(--orange);
+  color: var(--white);
+  border: none;
+  padding: 13px;
+  border-radius: 6px;
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+  margin-top: 6px;
+  transition: background 0.2s, box-shadow 0.2s, transform 0.2s;
+}
+
+.form-submit:hover {
+  background: var(--orange-light);
+  box-shadow: 0 0 32px var(--orange-glow);
+  transform: translateY(-1px);
+}
+
+.form-privacy {
+  text-align: center;
+  font-size: 12px;
+  color: rgba(255,255,255,0.25);
+  margin-top: 10px;
+}
+
+.hero-stat {
+  margin-top: 14px;
+  font-size: 12px;
+  color: rgba(255,255,255,0.28);
+  text-align: center;
+}
+
+.hero-stat strong { color: rgba(255,255,255,0.5); }
+
+/* Loading */
+.search-loading {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 24px;
+}
+
+.loading-step {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  font-size: 14px;
+  color: var(--gray);
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.4s, transform 0.4s;
+}
+
+.loading-step.active { opacity: 1; transform: none; color: var(--white); }
+.loading-step.done { color: var(--orange); }
+
+.loading-spinner {
+  width: 14px; height: 14px;
+  border: 2px solid rgba(255,255,255,0.1);
+  border-top-color: var(--orange);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  flex-shrink: 0;
+}
+
+.loading-check {
+  width: 14px; height: 14px;
+  background: var(--orange);
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: none;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Result */
+.result-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.result-badge {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 5px 12px;
+  border-radius: 100px;
+}
+
+.result-ok .result-badge {
+  background: rgba(0,200,100,0.12);
+  border: 1px solid rgba(0,200,100,0.3);
+  color: #00c864;
+}
+
+.result-warn .result-badge {
+  background: rgba(255,180,0,0.12);
+  border: 1px solid rgba(255,180,0,0.3);
+  color: #ffb400;
+}
+
+.result-danger .result-badge {
+  background: rgba(255,60,60,0.12);
+  border: 1px solid rgba(255,60,60,0.3);
+  color: #ff3c3c;
+}
+
+.result-brand-tag {
+  font-size: 13px;
+  color: var(--gray);
+}
+
+.result-brand-tag strong { color: var(--white); }
+
+.result-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 16px 0;
+}
+
+.result-title {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  line-height: 1.2;
+}
+
+.result-note {
+  font-size: 14px;
+  color: var(--gray-light);
+  line-height: 1.7;
+  margin-bottom: 24px;
+  padding: 14px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 6px;
+  border-left: 3px solid var(--orange);
+}
+
+.result-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.result-cta-btn {
+  flex: 1;
+  min-width: 160px;
+  border: none;
+  padding: 14px 20px;
+  border-radius: 6px;
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  display: block;
+  transition: background 0.2s, box-shadow 0.2s, transform 0.2s;
+}
+
+.result-cta-primary {
+  background: var(--orange);
+  color: var(--white);
+}
+
+.result-cta-primary:hover {
+  background: var(--orange-light);
+  box-shadow: 0 0 24px var(--orange-glow);
+  transform: translateY(-1px);
+}
+
+.result-cta-secondary {
+  background: rgba(255,255,255,0.06);
+  color: var(--gray-light);
+  border: 1px solid var(--border);
+}
+
+.result-cta-secondary:hover {
+  background: rgba(255,255,255,0.1);
+  color: var(--white);
+}
+
+@media (max-width: 600px) {
+  .form-row { grid-template-columns: 1fr; }
+  .result-actions { flex-direction: column; }
+}
+
+/* ===========================
+   SECTIONS GENERAL
+=========================== */
+section {
+  position: relative;
+  z-index: 1;
+}
+
+.section-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 100px 24px;
+}
+
+.section-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--orange);
+  margin-bottom: 16px;
+}
+
+.section-title {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 3vw, 48px);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: 0em;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+
+.section-sub {
+  font-size: 17px;
+  color: var(--gray-light);
+  font-weight: 300;
+  max-width: 560px;
+  margin-bottom: 60px;
+}
+
+/* fade in on scroll */
+.fade-in {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.fade-in.visible { opacity: 1; transform: none; }
+
+/* ===========================
+   WHY SECTION
+=========================== */
+#why { background: var(--black2); }
+
+.why-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+}
+
+.why-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 36px;
+  transition: border-color 0.3s, transform 0.3s;
+}
+
+.why-card:hover {
+  border-color: var(--border-orange);
+  transform: translateY(-4px);
+}
+
+.why-icon {
+  width: 48px; height: 48px;
+  margin-bottom: 20px;
+}
+
+.why-card h3 {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  margin-bottom: 12px;
+}
+
+.why-card p { font-size: 15px; color: var(--gray-light); font-weight: 300; line-height: 1.7; }
+
+/* ===========================
+   HOW IT WORKS
+=========================== */
+#how { background: var(--black); }
+
+.steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+  position: relative;
+}
+
+.steps::before {
+  content: '';
+  position: absolute;
+  top: 36px;
+  left: calc(16.66% + 24px);
+  right: calc(16.66% + 24px);
+  height: 1px;
+  background: linear-gradient(to right, var(--orange), rgba(255,106,0,0.3), var(--orange));
+}
+
+.step {
+  text-align: center;
+  padding: 0 24px;
+  position: relative;
+}
+
+.step-num {
+  width: 72px; height: 72px;
+  background: var(--black3);
+  border: 1px solid var(--border-orange);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 24px;
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--orange);
+  position: relative;
+  z-index: 1;
+  box-shadow: 0 0 24px rgba(255,106,0,0.2);
+}
+
+.step-icon {
+  width: 28px; height: 28px;
+}
+
+.step h3 {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  margin-bottom: 10px;
+}
+
+.step p { font-size: 14px; color: var(--gray); line-height: 1.7; }
+
+/* ===========================
+   FOR WHO
+=========================== */
+#forwho { background: var(--black2); }
+
+.who-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+}
+
+.who-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 28px 20px;
+  text-align: center;
+  transition: border-color 0.3s, background 0.3s, transform 0.3s;
+}
+
+.who-card:hover {
+  border-color: var(--border-orange);
+  background: var(--orange-dim);
+  transform: translateY(-4px);
+}
+
+.who-icon { width: 40px; height: 40px; margin: 0 auto 16px; }
+
+.who-card h3 {
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin-bottom: 8px;
+}
+
+.who-card p { font-size: 13px; color: var(--gray); }
+
+/* ===========================
+   CTA SECTION
+=========================== */
+#cta {
+  background: var(--black);
+  position: relative;
+  overflow: hidden;
+}
+
+#cta::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(255,106,0,0.15) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.cta-inner {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 120px 24px;
+  text-align: center;
+}
+
+.cta-inner .section-title { margin-bottom: 32px; }
+
+.cta-btn {
+  display: inline-block;
+  background: var(--orange);
+  color: var(--white);
+  border: none;
+  padding: 20px 48px;
+  border-radius: 6px;
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.2s, box-shadow 0.3s, transform 0.2s;
+}
+
+.cta-btn:hover {
+  background: var(--orange-light);
+  box-shadow: 0 0 60px var(--orange-glow), 0 0 120px rgba(255,106,0,0.15);
+  transform: translateY(-2px);
+}
+
+/* ===========================
+   FAQ
+=========================== */
+#faq { background: var(--black2); }
+
+.faq-list { max-width: 760px; }
+
+.faq-item {
+  border-bottom: 1px solid var(--border);
+}
+
+.faq-q {
+  width: 100%;
+  background: none;
+  border: none;
+  color: var(--white);
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  text-align: left;
+  padding: 24px 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  transition: color 0.2s;
+}
+
+.faq-q:hover { color: var(--orange); }
+
+.faq-arrow {
+  width: 20px; height: 20px;
+  flex-shrink: 0;
+  transition: transform 0.3s;
+}
+
+.faq-item.open .faq-arrow { transform: rotate(180deg); }
+
+.faq-a {
+  max-height: 0;
+  overflow: hidden;
+  font-size: 15px;
+  color: var(--gray-light);
+  line-height: 1.7;
+  font-weight: 300;
+  transition: max-height 0.4s ease, padding 0.3s;
+}
+
+.faq-item.open .faq-a {
+  max-height: 400px;
+  padding-bottom: 24px;
+}
+
+/* ===========================
+   FOOTER
+=========================== */
+footer {
+  position: relative;
+  z-index: 1;
+  background: var(--black);
+  border-top: 1px solid var(--border);
+  padding: 60px 24px 40px;
+}
+
+.footer-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 40px;
+  align-items: start;
+}
+
+.footer-brand .logo-text { font-size: 20px; }
+
+.footer-desc {
+  font-size: 14px;
+  color: var(--gray);
+  margin-top: 12px;
+  max-width: 300px;
+  font-weight: 300;
+}
+
+.footer-links { display: flex; flex-direction: column; gap: 12px; align-items: flex-end; }
+
+.footer-link {
+  font-size: 14px;
+  color: var(--gray);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.footer-link:hover { color: var(--orange); }
+
+.footer-bottom {
+  max-width: 1100px;
+  margin: 40px auto 0;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+  font-size: 12px;
+  color: rgba(255,255,255,0.25);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+/* ===========================
+   ANIMATIONS
+=========================== */
+@keyframes fadeDown {
+  from { opacity: 0; transform: translateY(-16px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* ===========================
+/* ===========================
+   RESPONSIVE
+=========================== */
+@media (max-width: 768px) {
+  nav { padding: 16px 20px; }
+  .nav-cta { display: none; }
+  .steps { grid-template-columns: 1fr; gap: 40px; }
+  .steps::before { display: none; }
+  .footer-inner { grid-template-columns: 1fr; }
+  .footer-links { align-items: flex-start; }
+}
+</style>
+</head>
+<body>
+
+<!-- Background Canvas -->
+<canvas id="bg-canvas"></canvas>
+
+<!-- ===========================
+     NAVBAR
+=========================== -->
+<nav id="navbar">
+  <a href="#" class="logo">
+    <!-- Substitua o src abaixo pelo caminho da sua logo -->
+    <img src="logo.png" alt="Lomazy" class="logo-img">
+  </a>
+  <a href="#hero" class="nav-cta">Verificar minha marca</a>
+</nav>
+
+<!-- ===========================
+     HERO
+=========================== -->
+<section id="hero">
+  <!-- HERO STAR OF DAVID — premium geometric background -->
+  <canvas id="hero-canvas"></canvas>
+  <div class="hero-star-wrap" id="hero-star-wrap">
+    <svg class="hero-star-svg" viewBox="0 0 800 800" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <!-- Diffuse glow center -->
+        <radialGradient id="centerGlow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%"   stop-color="#ff6a00" stop-opacity="0.12"/>
+          <stop offset="55%"  stop-color="#ff6a00" stop-opacity="0.03"/>
+          <stop offset="100%" stop-color="#ff6a00" stop-opacity="0"/>
+        </radialGradient>
+        <!-- Soft line glow filter -->
+        <filter id="lineGlow" x="-30%" y="-30%" width="160%" height="160%">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="2.5" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <!-- Strong center glow -->
+        <filter id="centerGlowF" x="-100%" y="-100%" width="300%" height="300%">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <!-- Energy particle glow -->
+        <filter id="particleGlow" x="-200%" y="-200%" width="500%" height="500%">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+
+      <!-- === ATMOSPHERE === -->
+      <circle cx="400" cy="400" r="400" fill="url(#centerGlow)"/>
+      <!-- === STAR OF DAVID — BASE LINES (very subtle) === -->
+      <!-- Triangle up -->
+      <polygon id="tri-up"
+        points="400,72 672,532 128,532"
+        fill="none" stroke="#ff6a00" stroke-width="0.8" opacity="0.1"/>
+      <!-- Triangle down -->
+      <polygon id="tri-down"
+        points="400,728 128,268 672,268"
+        fill="none" stroke="#ff6a00" stroke-width="0.8" opacity="0.1"/>
+
+      <!-- Inner triangles — slightly more visible -->
+      <polygon
+        points="400,168 592,492 208,492"
+        fill="none" stroke="#ff6a00" stroke-width="0.5" opacity="0.07"/>
+      <polygon
+        points="400,632 208,308 592,308"
+        fill="none" stroke="#ff6a00" stroke-width="0.5" opacity="0.07"/>
+
+      <!-- === STAR OF DAVID — GLOWING LINES (layer 2) === -->
+      <!-- Triangle up glow -->
+      <polygon
+        points="400,72 672,532 128,532"
+        fill="none" stroke="#ff6a00" stroke-width="1.6" opacity="0.13"
+        filter="url(#lineGlow)"/>
+      <!-- Triangle down glow -->
+      <polygon
+        points="400,728 128,268 672,268"
+        fill="none" stroke="#ff6a00" stroke-width="1.6" opacity="0.13"
+        filter="url(#lineGlow)"/>
+      <!-- === ENERGY PARTICLES — animated light traveling the edges === -->
+      <!-- Triangle up — edge 1: top to bottom-right -->
+      <line class="star-edge" x1="400" y1="72" x2="672" y2="532"
+        stroke="#ff8533" stroke-width="3" stroke-linecap="round"
+        filter="url(#particleGlow)"
+        style="--dur:8s; --delay:0s"/>
+      <!-- Triangle up — edge 2: bottom-right to bottom-left -->
+      <line class="star-edge" x1="672" y1="532" x2="128" y2="532"
+        stroke="#ff8533" stroke-width="3" stroke-linecap="round"
+        filter="url(#particleGlow)"
+        style="--dur:8s; --delay:2.6s"/>
+      <!-- Triangle up — edge 3: bottom-left to top -->
+      <line class="star-edge" x1="128" y1="532" x2="400" y2="72"
+        stroke="#ff8533" stroke-width="3" stroke-linecap="round"
+        filter="url(#particleGlow)"
+        style="--dur:8s; --delay:5.2s"/>
+
+      <!-- Triangle down — edge 1 -->
+      <line class="star-edge" x1="400" y1="728" x2="672" y2="268"
+        stroke="#ff6a00" stroke-width="3" stroke-linecap="round"
+        filter="url(#particleGlow)"
+        style="--dur:9s; --delay:1.5s"/>
+      <!-- Triangle down — edge 2 -->
+      <line class="star-edge" x1="672" y1="268" x2="128" y2="268"
+        stroke="#ff6a00" stroke-width="3" stroke-linecap="round"
+        filter="url(#particleGlow)"
+        style="--dur:9s; --delay:4.5s"/>
+      <!-- Triangle down — edge 3 -->
+      <line class="star-edge" x1="128" y1="268" x2="400" y2="728"
+        stroke="#ff6a00" stroke-width="3" stroke-linecap="round"
+        filter="url(#particleGlow)"
+        style="--dur:9s; --delay:7.5s"/>
+
+      <!-- === VERTEX GLOW DOTS — subtle halos at star points === -->
+      <circle cx="400" cy="72"  r="4" fill="#ff6a00" opacity="0.25" filter="url(#particleGlow)"/>
+      <circle cx="672" cy="532" r="4" fill="#ff6a00" opacity="0.25" filter="url(#particleGlow)"/>
+      <circle cx="128" cy="532" r="4" fill="#ff6a00" opacity="0.25" filter="url(#particleGlow)"/>
+      <circle cx="400" cy="728" r="4" fill="#ff6a00" opacity="0.25" filter="url(#particleGlow)"/>
+      <circle cx="672" cy="268" r="4" fill="#ff6a00" opacity="0.25" filter="url(#particleGlow)"/>
+      <circle cx="128" cy="268" r="4" fill="#ff6a00" opacity="0.25" filter="url(#particleGlow)"/>
+
+    </svg>
+  </div>
+
+  <div class="hero-badge">
+    <span class="hero-badge-dot"></span>
+    Plataforma de registro de marcas — INPI Brasil
+  </div>
+
+  <h1>Proteja sua marca antes que<br><em>alguém registre primeiro.</em></h1>
+
+  <p class="hero-sub">Verifique gratuitamente se o nome da sua marca pode ser registrado no INPI.</p>
+
+  <!-- SIMULADOR: 3 etapas -->
+  <div class="search-box" id="simulator">
+
+    <!-- ETAPA 1: Formulário de captura -->
+    <div id="stage-form">
+      <div class="sim-header">
+        <p class="sim-step-label">Preencha para verificar gratuitamente</p>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Nome</label>
+          <input type="text" id="f-nome" placeholder="Seu nome completo" autocomplete="name" name="name">
+        </div>
+        <div class="form-group">
+          <label>WhatsApp</label>
+          <input type="tel" id="f-whats" placeholder="(11) 99999-9999" autocomplete="tel" name="tel" maxlength="15" inputmode="numeric">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Nome da marca</label>
+          <input type="text" id="f-marca" placeholder="Nome que deseja registrar">
+        </div>
+        <div class="form-group">
+          <label>Área de atuação</label>
+          <select id="f-area">
+            <option value="" disabled selected>Selecione sua área</option>
+            <option>Moda e vestuário</option>
+            <option>Alimentação e bebidas</option>
+            <option>Tecnologia e software</option>
+            <option>Saúde e beleza</option>
+            <option>Educação</option>
+            <option>E-commerce</option>
+            <option>Serviços profissionais</option>
+            <option>Indústria e comércio</option>
+            <option>Entretenimento</option>
+            <option>Outra</option>
+          </select>
+        </div>
+      </div>
+      <button class="form-submit" onclick="submitLeadForm()">Verificar disponibilidade da minha marca</button>
+      <p class="form-privacy">Seus dados são usados apenas para enviar sua análise. Sem spam.</p>
+    </div>
+
+    <!-- ETAPA 2: Loading animado -->
+    <div id="stage-loading" style="display:none">
+      <div class="sim-header">
+        <p class="sim-step-label">Consultando a base do INPI</p>
+        <p class="sim-step-title">Analisando <span id="loading-brand-name"></span>...</p>
+      </div>
+      <div class="search-loading" style="display:block; margin-top:16px">
+        <div class="loading-step" id="step1">
+          <div class="loading-spinner" id="spinner1"></div>
+          <div class="loading-check" id="check1"></div>
+          Consultando base do INPI...
+        </div>
+        <div class="loading-step" id="step2">
+          <div class="loading-spinner" id="spinner2" style="display:none"></div>
+          <div class="loading-check" id="check2"></div>
+          Verificando registros idênticos...
+        </div>
+        <div class="loading-step" id="step3">
+          <div class="loading-spinner" id="spinner3" style="display:none"></div>
+          <div class="loading-check" id="check3"></div>
+          Analisando marcas semelhantes...
+        </div>
+      </div>
+    </div>
+
+    <!-- ETAPA 3: Resultado -->
+    <div id="stage-result" style="display:none">
+      <div class="search-result" id="search-result">
+        <div class="result-top">
+          <div class="result-badge" id="result-badge"></div>
+          <span class="result-brand-tag">Marca: <strong id="result-brand-tag"></strong></span>
+        </div>
+        <div class="result-title" id="result-title"></div>
+        <div class="result-note" id="result-note"></div>
+        <div class="result-actions">
+          <a id="result-whats-btn" href="https://wa.me/5511999999999" target="_blank" class="result-cta-btn result-cta-primary">Falar com especialista no WhatsApp</a>
+          <button class="result-cta-btn result-cta-secondary" onclick="resetSimulator()">Verificar outra marca</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <p class="hero-stat">Mais de <strong>382.000 pedidos</strong> de registro foram feitos no INPI em 2024.</p>
+</section>
+<!-- ===========================
+     WHY REGISTER
+=========================== -->
+<section id="why">
+  <div class="section-inner">
+    <div class="fade-in">
+      <p class="section-label">Por que registrar</p>
+      <h2 class="section-title">Ter CNPJ não é suficiente.<br>Só o INPI garante a exclusividade.</h2>
+      <p class="section-sub">Sem o registro, qualquer concorrente pode usar seu nome e você não terá respaldo legal para impedir.</p>
+    </div>
+
+    <div class="why-grid">
+      <div class="why-card fade-in">
+        <svg class="why-icon" viewBox="0 0 48 48" fill="none">
+          <circle cx="24" cy="24" r="20" stroke="#ff6a00" stroke-width="1.5"/>
+          <path d="M16 24l6 6 10-12" stroke="#ff6a00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <h3>CNPJ não protege sua marca</h3>
+        <p>O CNPJ registra sua empresa, não seu nome de marca. Você pode ter o CNPJ e outro empresário registrar sua marca no INPI antes de você.</p>
+      </div>
+      <div class="why-card fade-in">
+        <svg class="why-icon" viewBox="0 0 48 48" fill="none">
+          <rect x="10" y="14" width="28" height="22" rx="3" stroke="#ff6a00" stroke-width="1.5"/>
+          <path d="M17 14V12a7 7 0 0114 0v2" stroke="#ff6a00" stroke-width="1.5"/>
+          <circle cx="24" cy="25" r="3" fill="#ff6a00"/>
+        </svg>
+        <h3>Quem registra primeiro tem o direito</h3>
+        <p>O sistema brasileiro adota o princípio da anterioridade: quem protocola o pedido primeiro no INPI tem prioridade sobre o uso da marca.</p>
+      </div>
+      <div class="why-card fade-in">
+        <svg class="why-icon" viewBox="0 0 48 48" fill="none">
+          <path d="M24 8L38 14v12c0 9-7 14-14 16C17 40 10 35 10 26V14L24 8z" stroke="#ff6a00" stroke-width="1.5"/>
+          <path d="M18 24l4 4 8-8" stroke="#ff6a00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <h3>Evite disputas jurídicas</h3>
+        <p>Com o registro em mãos, você pode acionar judicialmente quem usar sua marca sem autorização, em todo o território nacional.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===========================
+     HOW IT WORKS
+=========================== -->
+<section id="how">
+  <div class="section-inner">
+    <div class="fade-in" style="text-align:center; margin-bottom:80px">
+      <p class="section-label">Como funciona</p>
+      <h2 class="section-title">Três etapas para proteger<br>o que é seu</h2>
+    </div>
+
+    <div class="steps fade-in">
+      <div class="step">
+        <div class="step-num">
+          <svg class="step-icon" viewBox="0 0 28 28" fill="none">
+            <circle cx="14" cy="14" r="6" stroke="#ff6a00" stroke-width="1.5"/>
+            <path d="M14 4v3M14 21v3M4 14h3M21 14h3" stroke="#ff6a00" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <h3>Busca de viabilidade</h3>
+        <p>Realizamos uma análise completa da base do INPI para verificar se o nome desejado está disponível para registro.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">
+          <svg class="step-icon" viewBox="0 0 28 28" fill="none">
+            <rect x="6" y="4" width="16" height="20" rx="2" stroke="#ff6a00" stroke-width="1.5"/>
+            <path d="M10 10h8M10 14h8M10 18h5" stroke="#ff6a00" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <h3>Protocolo no INPI</h3>
+        <p>Cuidamos de toda a documentação e protocolo do pedido de registro junto ao INPI, com a classe correta para seu negócio.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">
+          <svg class="step-icon" viewBox="0 0 28 28" fill="none">
+            <path d="M14 4L17 11H24L18.5 15.5L20.5 23L14 18.5L7.5 23L9.5 15.5L4 11H11L14 4Z" stroke="#ff6a00" stroke-width="1.5" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <h3>Acompanhamento até a aprovação</h3>
+        <p>Monitoramos o processo e respondemos eventuais exigências do INPI até a concessão final do certificado de registro.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===========================
+     FOR WHO
+=========================== -->
+<section id="forwho">
+  <div class="section-inner">
+    <div class="fade-in">
+      <p class="section-label">Para quem é</p>
+      <h2 class="section-title">Ideal para quem<br>está construindo algo real</h2>
+      <p class="section-sub">De MEIs a startups em crescimento — qualquer negócio com identidade merece proteção.</p>
+    </div>
+
+    <div class="who-grid fade-in">
+      <div class="who-card">
+        <svg class="who-icon" viewBox="0 0 40 40" fill="none">
+          <circle cx="20" cy="14" r="7" stroke="#ff6a00" stroke-width="1.5"/>
+          <path d="M8 34c0-6.627 5.373-12 12-12s12 5.373 12 12" stroke="#ff6a00" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <h3>MEI</h3>
+        <p>Microempreendedores individuais que querem proteger seu negócio</p>
+      </div>
+      <div class="who-card">
+        <svg class="who-icon" viewBox="0 0 40 40" fill="none">
+          <rect x="6" y="10" width="28" height="20" rx="3" stroke="#ff6a00" stroke-width="1.5"/>
+          <path d="M13 22l4-4 4 4 6-6" stroke="#ff6a00" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <h3>E-commerce</h3>
+        <p>Lojas online que vendem em marketplaces e precisam de exclusividade</p>
+      </div>
+      <div class="who-card">
+        <svg class="who-icon" viewBox="0 0 40 40" fill="none">
+          <path d="M20 8v6M20 26v6M8 20h6M26 20h6" stroke="#ff6a00" stroke-width="1.5" stroke-linecap="round"/>
+          <circle cx="20" cy="20" r="6" stroke="#ff6a00" stroke-width="1.5"/>
+        </svg>
+        <h3>Prestadores de serviço</h3>
+        <p>Profissionais e agências que têm um nome no mercado para defender</p>
+      </div>
+      <div class="who-card">
+        <svg class="who-icon" viewBox="0 0 40 40" fill="none">
+          <path d="M20 8L34 14v10c0 7-5.6 11.2-14 14C11.6 35.2 6 31 6 24V14L20 8z" stroke="#ff6a00" stroke-width="1.5"/>
+        </svg>
+        <h3>Startups</h3>
+        <p>Empresas em fase de captação que precisam proteger o ativo intangível</p>
+      </div>
+      <div class="who-card">
+        <svg class="who-icon" viewBox="0 0 40 40" fill="none">
+          <path d="M10 30V18l10-8 10 8v12" stroke="#ff6a00" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <rect x="16" y="22" width="8" height="8" rx="1" stroke="#ff6a00" stroke-width="1.5"/>
+        </svg>
+        <h3>Empresas em crescimento</h3>
+        <p>Negócios que estão se expandindo e precisam garantir a exclusividade nacional</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===========================
+     CTA SECTION
+=========================== -->
+<section id="cta">
+  <div class="cta-inner fade-in">
+    <p class="section-label" style="text-align:center">Comece agora</p>
+    <h2 class="section-title" style="text-align:center">Descubra agora se sua marca<br>pode ser registrada.</h2>
+    <a href="#hero" class="cta-btn">Verificar minha marca</a>
+  </div>
+</section>
+
+<!-- ===========================
+     FAQ
+=========================== -->
+<section id="faq">
+  <div class="section-inner">
+    <div class="fade-in">
+      <p class="section-label">Dúvidas frequentes</p>
+      <h2 class="section-title">Perguntas que todo<br>empreendedor faz</h2>
+    </div>
+
+    <div class="faq-list fade-in">
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          Quanto custa registrar uma marca?
+          <svg class="faq-arrow" viewBox="0 0 20 20" fill="none"><path d="M5 7.5l5 5 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </button>
+        <div class="faq-a">O custo varia conforme o porte da empresa e o número de classes desejadas. MEIs e microempresas têm desconto nas taxas do INPI. Além das taxas governamentais, cobramos pelos serviços de análise, protocolo e acompanhamento. Entre em contato para receber um orçamento personalizado.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          Quanto tempo demora o processo?
+          <svg class="faq-arrow" viewBox="0 0 20 20" fill="none"><path d="M5 7.5l5 5 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </button>
+        <div class="faq-a">O processo de registro no INPI costuma levar entre 18 e 36 meses até a concessão final do certificado. No entanto, assim que o pedido é protocolado, sua marca já está com proteção preliminar — o que garante anterioridade de data desde o primeiro dia.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          Posso registrar uma marca sendo MEI?
+          <svg class="faq-arrow" viewBox="0 0 20 20" fill="none"><path d="M5 7.5l5 5 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </button>
+        <div class="faq-a">Sim. MEIs têm o direito de registrar marcas no INPI e ainda contam com desconto nas taxas oficiais. O registro é feito no CPF ou CNPJ do MEI e confere os mesmos direitos de exclusividade que empresas de maior porte.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          O registro vale para todo o Brasil?
+          <svg class="faq-arrow" viewBox="0 0 20 20" fill="none"><path d="M5 7.5l5 5 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </button>
+        <div class="faq-a">Sim. O registro de marca concedido pelo INPI tem validade em todo o território nacional, com duração de 10 anos, renovável por períodos iguais indefinidamente.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===========================
+     FOOTER
+=========================== -->
+<footer>
+  <div class="footer-inner">
+    <div>
+      <a href="#" class="logo">
+        <img src="logo.png" alt="Lomazy" class="logo-img logo-img--footer">
+      </a>
+      <p class="footer-desc">Registro de marcas no Brasil com agilidade, segurança e acompanhamento especializado junto ao INPI.</p>
+    </div>
+    <div class="footer-links">
+      <a href="https://wa.me/5511999999999" class="footer-link" target="_blank">WhatsApp</a>
+      <a href="#why" class="footer-link">Por que registrar</a>
+      <a href="#how" class="footer-link">Como funciona</a>
+      <a href="#faq" class="footer-link">Perguntas frequentes</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2024 LOMAZY. Todos os direitos reservados.</span>
+    <span>Registro de Marcas no Brasil — INPI</span>
+  </div>
+</footer>
+
+<!-- ===========================
+     JAVASCRIPT
+=========================== -->
+<script>
+/* --- Background canvas particles --- */
+(function() {
+  const canvas = document.getElementById('bg-canvas');
+  const ctx = canvas.getContext('2d');
+  let W, H, particles = [];
+
+  function resize() {
+    W = canvas.width = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+
+  function Particle() {
+    this.x = Math.random() * W;
+    this.y = Math.random() * H;
+    this.vx = (Math.random() - 0.5) * 0.3;
+    this.vy = (Math.random() - 0.5) * 0.3;
+    this.r = Math.random() * 1.5 + 0.3;
+    this.alpha = Math.random() * 0.5 + 0.1;
+    this.color = Math.random() > 0.7 ? '#ff6a00' : '#ffffff';
+  }
+
+  function init() {
+    resize();
+    particles = [];
+    for (let i = 0; i < 80; i++) particles.push(new Particle());
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    particles.forEach(p => {
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = p.color;
+      ctx.globalAlpha = p.alpha;
+      ctx.fill();
+      p.x += p.vx;
+      p.y += p.vy;
+      if (p.x < 0 || p.x > W) p.vx *= -1;
+      if (p.y < 0 || p.y > H) p.vy *= -1;
+    });
+    ctx.globalAlpha = 0.04;
+    ctx.strokeStyle = '#ff6a00';
+    ctx.lineWidth = 0.5;
+    for (let i = 0; i < particles.length; i++) {
+      for (let j = i + 1; j < particles.length; j++) {
+        const dx = particles[i].x - particles[j].x;
+        const dy = particles[i].y - particles[j].y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 120) {
+          ctx.globalAlpha = 0.06 * (1 - dist / 120);
+          ctx.beginPath();
+          ctx.moveTo(particles[i].x, particles[i].y);
+          ctx.lineTo(particles[j].x, particles[j].y);
+          ctx.stroke();
+        }
+      }
+    }
+    ctx.globalAlpha = 1;
+    requestAnimationFrame(draw);
+  }
+
+  window.addEventListener('resize', resize);
+  init();
+  draw();
+})();
+
+/* --- Navbar scroll effect --- */
+window.addEventListener('scroll', function() {
+  document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 60);
+});
+
+/* ===========================
+   PHONE MASK + VALIDATION
+=========================== */
+
+// DDDs válidos no Brasil
+const DDDS_VALIDOS = [
+  11,12,13,14,15,16,17,18,19, // SP
+  21,22,24,                    // RJ
+  27,28,                       // ES
+  31,32,33,34,35,37,38,        // MG
+  41,42,43,44,45,46,           // PR
+  47,48,49,                    // SC
+  51,53,54,55,                 // RS
+  61,                          // DF
+  62,64,                       // GO
+  63,                          // TO
+  65,66,                       // MT
+  67,                          // MS
+  68,                          // AC
+  69,                          // RO
+  71,73,74,75,77,              // BA
+  79,                          // SE
+  81,87,                       // PE
+  82,                          // AL
+  83,                          // PB
+  84,                          // RN
+  85,88,                       // CE
+  86,89,                       // PI
+  91,93,94,                    // PA
+  92,97,                       // AM
+  95,                          // RR
+  96,                          // AP
+  98,99                        // MA
+];
+
+function applyPhoneMask(input) {
+  // Remove tudo que não for dígito
+  let digits = input.value.replace(/\D/g, '').slice(0, 11);
+
+  let formatted = '';
+  if (digits.length === 0) {
+    formatted = '';
+  } else if (digits.length <= 2) {
+    formatted = '(' + digits;
+  } else if (digits.length <= 6) {
+    formatted = '(' + digits.slice(0,2) + ') ' + digits.slice(2);
+  } else if (digits.length <= 10) {
+    // fixo: (XX) XXXX-XXXX
+    formatted = '(' + digits.slice(0,2) + ') ' + digits.slice(2,6) + '-' + digits.slice(6);
+  } else {
+    // celular: (XX) XXXXX-XXXX
+    formatted = '(' + digits.slice(0,2) + ') ' + digits.slice(2,7) + '-' + digits.slice(7);
+  }
+
+  input.value = formatted;
+}
+
+function validatePhone(input) {
+  const digits = input.value.replace(/\D/g, '');
+
+  // Tamanho mínimo: 10 dígitos (fixo) ou 11 (celular)
+  if (digits.length < 10) return 'Número incompleto';
+
+  const ddd = parseInt(digits.slice(0, 2), 10);
+  if (!DDDS_VALIDOS.includes(ddd)) return 'DDD inválido';
+
+  // Celular deve começar com 9
+  if (digits.length === 11 && digits[2] !== '9') return 'Celular deve começar com 9';
+
+  // Sequências inválidas (todos iguais)
+  const numPart = digits.slice(2);
+  if (/^(\d)\1+$/.test(numPart)) return 'Número inválido';
+
+  return null; // válido
+}
+
+function showFieldError(input, msg) {
+  input.classList.add('invalid');
+  let err = input.parentElement.querySelector('.field-error');
+  if (!err) {
+    err = document.createElement('span');
+    err.className = 'field-error';
+    input.parentElement.appendChild(err);
+  }
+  err.textContent = msg;
+}
+
+function clearFieldError(input) {
+  input.classList.remove('invalid');
+  const err = input.parentElement.querySelector('.field-error');
+  if (err) err.remove();
+}
+
+// Aplica máscara em tempo real
+document.getElementById('f-whats').addEventListener('input', function() {
+  applyPhoneMask(this);
+  clearFieldError(this);
+});
+
+// Quando o browser preenche via autocomplete, formatar também
+document.getElementById('f-whats').addEventListener('change', function() {
+  applyPhoneMask(this);
+});
+
+document.getElementById('f-nome').addEventListener('input', function() {
+  clearFieldError(this);
+});
+
+/* --- Simulator flow: form -> loading -> result --- */
+
+function submitLeadForm() {
+  const nome  = document.getElementById('f-nome');
+  const whats = document.getElementById('f-whats');
+  const marca = document.getElementById('f-marca');
+  const area  = document.getElementById('f-area');
+
+  let valid = true;
+
+  // Nome
+  if (!nome.value.trim() || nome.value.trim().split(' ').length < 2) {
+    showFieldError(nome, 'Informe nome e sobrenome');
+    valid = false;
+  } else {
+    clearFieldError(nome);
+  }
+
+  // Telefone
+  const phoneErr = validatePhone(whats);
+  if (phoneErr) {
+    showFieldError(whats, phoneErr);
+    valid = false;
+  } else {
+    clearFieldError(whats);
+  }
+
+  // Marca
+  if (!marca.value.trim()) {
+    showFieldError(marca, 'Informe o nome da marca');
+    valid = false;
+  } else {
+    clearFieldError(marca);
+  }
+
+  // Área
+  if (!area.value) {
+    showFieldError(area, 'Selecione uma área');
+    valid = false;
+  } else {
+    clearFieldError(area);
+  }
+
+  if (!valid) return;
+
+  const brandName = marca.value.trim();
+
+  // Go to loading stage
+  document.getElementById('stage-form').style.display = 'none';
+  document.getElementById('stage-loading').style.display = 'block';
+  document.getElementById('loading-brand-name').textContent = '"' + brandName + '"';
+
+  // Animate steps
+  const steps = [
+    { el: document.getElementById('step1'), spinner: document.getElementById('spinner1'), check: document.getElementById('check1') },
+    { el: document.getElementById('step2'), spinner: document.getElementById('spinner2'), check: document.getElementById('check2') },
+    { el: document.getElementById('step3'), spinner: document.getElementById('spinner3'), check: document.getElementById('check3') },
+  ];
+
+  steps.forEach(s => {
+    s.el.classList.remove('active', 'done');
+    s.check.style.display = 'none';
+    s.spinner.style.display = 'none';
+  });
+
+  function activateStep(i) {
+    if (i >= steps.length) {
+      setTimeout(() => showResult(brandName), 400);
+      return;
+    }
+    const s = steps[i];
+    s.el.classList.add('active');
+    s.spinner.style.display = 'block';
+
+    setTimeout(() => {
+      s.spinner.style.display = 'none';
+      s.check.style.display = 'block';
+      s.el.classList.add('done');
+      activateStep(i + 1);
+    }, 800 + i * 350);
+  }
+
+  // Slight delay before first step animates in
+  setTimeout(() => activateStep(0), 200);
+}
+
+function showResult(name) {
+  document.getElementById('stage-loading').style.display = 'none';
+  document.getElementById('stage-result').style.display = 'block';
+
+  const r = Math.random();
+  const resultEl = document.getElementById('search-result');
+  const badge    = document.getElementById('result-badge');
+  const title    = document.getElementById('result-title');
+  const note     = document.getElementById('result-note');
+  const tag      = document.getElementById('result-brand-tag');
+
+  resultEl.className = 'search-result';
+  tag.textContent = name;
+
+  if (r < 0.7) {
+    resultEl.classList.add('result-ok');
+    badge.textContent = 'Disponível';
+    title.textContent = 'Nenhum registro idêntico encontrado';
+    note.textContent = 'A marca "' + name + '" não apresenta conflito direto na base do INPI. Porém podem existir marcas semelhantes na mesma classe — recomendamos uma análise completa antes do protocolo.';
+  } else if (r < 0.9) {
+    resultEl.classList.add('result-warn');
+    badge.textContent = 'Atenção';
+    title.textContent = 'Encontramos marcas semelhantes';
+    note.textContent = 'Há registros com similaridade a "' + name + '" na base do INPI. Isso pode dificultar a aprovação dependendo da classe. Uma análise profissional pode identificar alternativas viáveis.';
+  } else {
+    resultEl.classList.add('result-danger');
+    badge.textContent = 'Risco alto';
+    title.textContent = 'Registro idêntico ou muito semelhante detectado';
+    note.textContent = 'Encontramos um registro muito similar a "' + name + '" na base do INPI. Recomendamos análise profissional urgente para avaliar suas opções e estratégia de registro.';
+  }
+
+  document.getElementById('stage-result').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function resetSimulator() {
+  document.getElementById('stage-result').style.display = 'none';
+  document.getElementById('stage-loading').style.display = 'none';
+  document.getElementById('stage-form').style.display = 'block';
+  // Clear fields
+  ['f-nome','f-whats','f-marca'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('f-area').selectedIndex = 0;
+}
+
+/* --- FAQ accordion --- */
+function toggleFaq(btn) {
+  const item = btn.closest('.faq-item');
+  const isOpen = item.classList.contains('open');
+  document.querySelectorAll('.faq-item.open').forEach(el => el.classList.remove('open'));
+  if (!isOpen) item.classList.add('open');
+}
+
+/* --- Scroll fade-in observer --- */
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+      observer.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.12 });
+
+document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+/* ===========================
+   ENERGY PARTICLES — travel along star edges
+=========================== */
+(function() {
+  // Wait for DOM
+  const edges = document.querySelectorAll('.star-edge');
+  if (!edges.length) return;
+
+  edges.forEach(function(edge) {
+    const len = edge.getTotalLength ? edge.getTotalLength() : 600;
+    const dotLen = 50;
+    const dur = parseFloat(edge.style.getPropertyValue('--dur') || '8') * 1000;
+    const delay = parseFloat(edge.style.getPropertyValue('--delay') || '0') * 1000;
+
+    edge.style.strokeDasharray = dotLen + ' ' + (len + dotLen);
+    edge.style.strokeDashoffset = len + dotLen;
+    edge.style.opacity = '1';
+
+    let start = null;
+
+    function animate(ts) {
+      if (!start) start = ts + delay;
+      const elapsed = (ts - start) % dur;
+      if (elapsed < 0) { requestAnimationFrame(animate); return; }
+
+      const progress = elapsed / dur;
+      // ease in-out sine
+      const eased = -(Math.cos(Math.PI * progress) - 1) / 2;
+      const offset = (len + dotLen) - eased * (len + dotLen * 2);
+
+      // Fade in/out at extremes
+      const fadeLen = 0.08;
+      let alpha;
+      if (progress < fadeLen)        alpha = progress / fadeLen;
+      else if (progress > 1-fadeLen) alpha = (1-progress) / fadeLen;
+      else                           alpha = 1;
+
+      edge.style.strokeDashoffset = offset;
+      edge.style.opacity = (alpha * 0.9).toFixed(3);
+
+      requestAnimationFrame(animate);
+    }
+
+    setTimeout(function() {
+      requestAnimationFrame(animate);
+    }, delay);
+  });
+})();
+
+/* ===========================
+   HERO CANVAS — floating particles
+=========================== */
+(function() {
+  const canvas = document.getElementById('hero-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let W, H, pts = [];
+
+  function resize() {
+    W = canvas.width  = canvas.offsetWidth;
+    H = canvas.height = canvas.offsetHeight;
+  }
+
+  function Pt() {
+    this.x  = Math.random() * W;
+    this.y  = Math.random() * H;
+    this.vx = (Math.random() - 0.5) * 0.18;
+    this.vy = (Math.random() - 0.5) * 0.18;
+    this.r  = Math.random() * 1.2 + 0.3;
+    this.a  = Math.random() * 0.35 + 0.05;
+    this.orange = Math.random() > 0.72;
+  }
+
+  function init() {
+    resize();
+    pts = [];
+    const count = Math.min(55, Math.floor(W * H / 14000));
+    for (let i = 0; i < count; i++) pts.push(new Pt());
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    pts.forEach(p => {
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = p.orange ? '#ff6a00' : '#ffffff';
+      ctx.globalAlpha = p.a;
+      ctx.fill();
+      p.x += p.vx; p.y += p.vy;
+      if (p.x < 0 || p.x > W) p.vx *= -1;
+      if (p.y < 0 || p.y > H) p.vy *= -1;
+    });
+
+    // Faint connecting lines between nearby particles
+    ctx.lineWidth = 0.4;
+    for (let i = 0; i < pts.length; i++) {
+      for (let j = i + 1; j < pts.length; j++) {
+        const dx = pts[i].x - pts[j].x;
+        const dy = pts[i].y - pts[j].y;
+        const d  = Math.sqrt(dx*dx + dy*dy);
+        if (d < 90) {
+          ctx.globalAlpha = 0.04 * (1 - d/90);
+          ctx.strokeStyle = '#ff6a00';
+          ctx.beginPath();
+          ctx.moveTo(pts[i].x, pts[i].y);
+          ctx.lineTo(pts[j].x, pts[j].y);
+          ctx.stroke();
+        }
+      }
+    }
+    ctx.globalAlpha = 1;
+    requestAnimationFrame(draw);
+  }
+
+  window.addEventListener('resize', init);
+  init();
+  draw();
+})();
+
+/* ===========================
+   MOUSE PARALLAX — hero star
+=========================== */
+(function() {
+  const wrap = document.getElementById('hero-star-wrap');
+  if (!wrap) return;
+  let cx = 0, cy = 0, tx = 0, ty = 0;
+  let raf;
+
+  document.getElementById('hero').addEventListener('mousemove', function(e) {
+    const rect = this.getBoundingClientRect();
+    // Normalize -1 to 1
+    cx = ((e.clientX - rect.left) / rect.width  - 0.5) * 2;
+    cy = ((e.clientY - rect.top)  / rect.height - 0.5) * 2;
+  });
+
+  document.getElementById('hero').addEventListener('mouseleave', function() {
+    cx = 0; cy = 0;
+  });
+
+  function loop() {
+    // Smooth lerp toward target
+    tx += (cx - tx) * 0.04;
+    ty += (cy - ty) * 0.04;
+    const maxShift = 10; // px — very subtle
+    wrap.style.transform =
+      'translate(calc(-50% + ' + (tx * maxShift) + 'px), calc(-50% + ' + (ty * maxShift) + 'px))';
+    raf = requestAnimationFrame(loop);
+  }
+  loop();
+})();
+</script>
+</body>
+</html>
