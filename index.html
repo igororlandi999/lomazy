@@ -13,9 +13,9 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --black: #0a0a0a;
-  --black2: #111111;
-  --black3: #161616;
+  --black: #1a1a1e;
+  --black2: #212126;
+  --black3: #26262c;
   --orange: #ff6a00;
   --orange-light: #ff8533;
   --orange-dim: rgba(255, 106, 0, 0.15);
@@ -53,8 +53,140 @@ body {
 }
 
 /* ===========================
-   NAVBAR
+   WHATSAPP FLUTUANTE
 =========================== */
+.whatsapp-float {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #25d366;
+  color: #fff;
+  border-radius: 100px;
+  padding: 13px 20px 13px 16px;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 4px 20px rgba(37,211,102,0.35);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.whatsapp-float:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(37,211,102,0.45);
+}
+
+.whatsapp-float-label {
+  white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+  .whatsapp-float {
+    padding: 14px;
+    border-radius: 50%;
+  }
+  .whatsapp-float-label { display: none; }
+}
+
+/* ===========================
+   DUPLA GARANTIA
+=========================== */
+#garantia {
+  background: var(--black2);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.garantia-grid {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  max-width: 860px;
+  margin: 0 auto;
+}
+
+@media (max-width: 720px) {
+  .garantia-grid { flex-direction: column; }
+  .garantia-divider { width: 100%; height: 1px; background: var(--border); margin: 0; }
+}
+
+.garantia-divider {
+  width: 1px;
+  background: var(--border);
+  flex-shrink: 0;
+  margin: 0 4px;
+}
+
+.garantia-selo {
+  flex: 1;
+  padding: 40px 36px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: relative;
+  background: rgba(255,255,255,0.03);
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.garantia-selo--destaque {
+  background: rgba(255,106,0,0.05);
+  border-color: rgba(255,106,0,0.2);
+}
+
+.garantia-selo-icon {
+  margin-bottom: 4px;
+}
+
+.garantia-selo-num {
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--gray);
+  text-transform: uppercase;
+}
+
+.garantia-selo-num--destaque {
+  color: var(--orange);
+}
+
+.garantia-selo-title {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.15;
+  text-transform: uppercase;
+  color: var(--white);
+}
+
+.garantia-selo-desc {
+  font-size: 14px;
+  color: var(--gray-light);
+  line-height: 1.65;
+}
+
+.garantia-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255,106,0,0.12);
+  border: 1px solid var(--border-orange);
+  color: var(--orange-light);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 4px 12px;
+  border-radius: 100px;
+  margin-top: 4px;
+  width: fit-content;
+}
+
+
 nav {
   position: fixed;
   top: 0; left: 0; right: 0;
@@ -123,9 +255,45 @@ nav.scrolled {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 90px 24px 32px;
+  padding: 100px 40px 60px;
   text-align: center;
   overflow: hidden;
+}
+
+/* Desktop: lado a lado */
+.hero-layout {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 1200px;
+  gap: 40px;
+  position: relative;
+  z-index: 2;
+}
+
+@media (min-width: 900px) {
+  .hero-layout {
+    flex-direction: row;
+    align-items: center;
+    text-align: left;
+    gap: 64px;
+    max-width: 1200px;
+  }
+  .hero-left {
+    flex: 1.1;
+    min-width: 0;
+  }
+  .hero-right {
+    flex: 0 0 500px;
+  }
+  #hero {
+    text-align: left;
+  }
+  .hero-badge { justify-content: flex-start; }
+  h1 { max-width: 100%; }
+  .hero-sub { max-width: 100%; }
+  .hero-stat { text-align: left; }
 }
 
 /* Deep radial atmosphere */
@@ -220,13 +388,13 @@ nav.scrolled {
 
 h1 {
   font-family: var(--font-display);
-  font-size: clamp(28px, 3.2vw, 48px);
+  font-size: clamp(36px, 4.8vw, 72px);
   font-weight: 800;
-  line-height: 1.08;
+  line-height: 1.0;
   letter-spacing: -0.01em;
   text-transform: uppercase;
   max-width: 620px;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
   animation: fadeDown 0.8s 0.1s ease both;
 }
 
@@ -236,12 +404,13 @@ h1 em {
 }
 
 .hero-sub {
-  font-size: 15px;
+  font-size: 17px;
   color: var(--gray-light);
   max-width: 480px;
   font-weight: 300;
-  margin-bottom: 24px;
+  margin-bottom: 28px;
   animation: fadeDown 0.8s 0.2s ease both;
+  line-height: 1.6;
 }
 
 /* ===========================
@@ -251,11 +420,15 @@ h1 em {
 .search-box {
   width: 100%;
   max-width: 680px;
-  background: rgba(255,255,255,0.03);
+  background: rgba(255,255,255,0.04);
   border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 12px;
-  padding: 24px;
+  border-radius: 14px;
+  padding: 32px;
   animation: fadeDown 0.8s 0.3s ease both;
+}
+
+@media (min-width: 900px) {
+  .search-box { max-width: 100%; padding: 36px; }
 }
 
 .sim-header { margin-bottom: 16px; }
@@ -524,6 +697,44 @@ h1 em {
 .result-cta-secondary:hover {
   background: rgba(255,255,255,0.1);
   color: var(--white);
+}
+
+/* Tabela de resultados reais do INPI */
+.result-table-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255,255,255,0.3);
+  margin: 20px 0 8px;
+}
+.result-rows { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+.result-row {
+  display: grid;
+  grid-template-columns: 1fr 110px 1fr;
+  gap: 8px;
+  align-items: center;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 12px;
+}
+.rr-marca   { font-weight: 600; color: var(--white); text-transform: uppercase; }
+.rr-titular { color: rgba(255,255,255,0.35); font-size: 11px; text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rr-status  { font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; padding: 3px 8px; border-radius: 100px; text-align: center; }
+.rr-registrada { background: rgba(255,60,60,0.15);  color: #ff6060; }
+.rr-atencao    { background: rgba(255,180,0,0.15);  color: #ffb800; }
+.rr-disponivel { background: rgba(60,200,100,0.15); color: #3cc864; }
+.result-fonte {
+  font-size: 11px;
+  color: rgba(255,255,255,0.2);
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+@media (max-width: 480px) {
+  .result-row { grid-template-columns: 1fr 90px; }
+  .rr-titular { display: none; }
 }
 
 @media (max-width: 600px) {
@@ -1028,6 +1239,8 @@ footer {
     </svg>
   </div>
 
+  <div class="hero-layout">
+  <div class="hero-left">
   <div class="hero-badge">
     <span class="hero-badge-dot"></span>
     Plataforma de registro de marcas — INPI Brasil
@@ -1036,7 +1249,9 @@ footer {
   <h1>Proteja sua marca antes que<br><em>alguém registre primeiro.</em></h1>
 
   <p class="hero-sub">Verifique gratuitamente se o nome da sua marca pode ser registrado no INPI.</p>
+  </div><!-- /hero-left -->
 
+  <div class="hero-right">
   <!-- SIMULADOR: 3 etapas -->
   <div class="search-box" id="simulator">
 
@@ -1122,7 +1337,9 @@ footer {
       </div>
     </div>
 
-  </div>
+  </div><!-- /search-box -->
+  </div><!-- /hero-right -->
+  </div><!-- /hero-layout -->
 
   <p class="hero-stat">Mais de <strong>382.000 pedidos</strong> de registro foram feitos no INPI em 2024.</p>
 </section>
@@ -1267,6 +1484,46 @@ footer {
 </section>
 
 <!-- ===========================
+     DUPLA GARANTIA
+=========================== -->
+<section id="garantia">
+  <div class="section-inner">
+    <div class="fade-in" style="text-align:center; margin-bottom: 48px;">
+      <p class="section-label">Nosso compromisso</p>
+      <h2 class="section-title">Dupla garantia para<br>você registrar com segurança</h2>
+      <p class="section-sub" style="text-align:center; max-width:520px; margin: 0 auto;">Assumimos o risco junto com você. Se o pedido for negado, corremos por nossa conta.</p>
+    </div>
+    <div class="garantia-grid fade-in">
+      <div class="garantia-selo">
+        <div class="garantia-selo-icon">
+          <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" width="40" height="40">
+            <path d="M24 4L6 12v14c0 10.5 7.7 20.3 18 23 10.3-2.7 18-12.5 18-23V12L24 4z" fill="rgba(255,106,0,0.12)" stroke="#ff6a00" stroke-width="1.5"/>
+            <path d="M16 24l6 6 10-10" stroke="#ff6a00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="garantia-selo-num">01</div>
+        <h3 class="garantia-selo-title">Análise prévia gratuita</h3>
+        <p class="garantia-selo-desc">Antes de protocolar qualquer pedido, verificamos a viabilidade do registro na base do INPI. Você só paga quando temos segurança de prosseguir.</p>
+      </div>
+      <div class="garantia-divider"></div>
+      <div class="garantia-selo garantia-selo--destaque">
+        <div class="garantia-selo-icon">
+          <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" width="40" height="40">
+            <path d="M24 4L6 12v14c0 10.5 7.7 20.3 18 23 10.3-2.7 18-12.5 18-23V12L24 4z" fill="rgba(255,106,0,0.18)" stroke="#ff6a00" stroke-width="2"/>
+            <path d="M18 24l4 4 8-8" stroke="#ff6a00" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M22 28l4 4 8-8" stroke="#ff6a00" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.5"/>
+          </svg>
+        </div>
+        <div class="garantia-selo-num garantia-selo-num--destaque">02</div>
+        <h3 class="garantia-selo-title">Se for negado, o próximo é por nossa conta</h3>
+        <p class="garantia-selo-desc">Se o seu pedido de registro for indeferido, o pedido de uma nova marca é totalmente por nossa conta. Sem custo adicional, sem burocracia.</p>
+        <div class="garantia-tag">Garantia exclusiva</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===========================
      CTA SECTION
 =========================== -->
 <section id="cta">
@@ -1319,6 +1576,17 @@ footer {
     </div>
   </div>
 </section>
+
+<!-- ===========================
+     WHATSAPP FLUTUANTE
+=========================== -->
+<a href="https://wa.me/5511999999999?text=Olá!%20Quero%20registrar%20minha%20marca%20no%20INPI." 
+   class="whatsapp-float" target="_blank" rel="noopener" title="Falar no WhatsApp">
+  <svg viewBox="0 0 24 24" fill="currentColor" width="28" height="28">
+    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+  </svg>
+  <span class="whatsapp-float-label">Fale conosco</span>
+</a>
 
 <!-- ===========================
      FOOTER
@@ -1527,7 +1795,13 @@ document.getElementById('f-nome').addEventListener('input', function() {
   clearFieldError(this);
 });
 
-/* --- Simulator flow: form -> loading -> result --- */
+/* ===========================
+   WORKER URL — altere após o deploy no Cloudflare
+   Exemplo: https://lomazy-inpi.SEU-USUARIO.workers.dev
+=========================== */
+const WORKER_URL = 'https://lomazy-inpi.igororlandibarros.workers.dev';
+
+/* --- Simulator flow: form -> loading (fetch real) -> result --- */
 
 function submitLeadForm() {
   const nome  = document.getElementById('f-nome');
@@ -1537,49 +1811,37 @@ function submitLeadForm() {
 
   let valid = true;
 
-  // Nome
   if (!nome.value.trim() || nome.value.trim().split(' ').length < 2) {
     showFieldError(nome, 'Informe nome e sobrenome');
     valid = false;
-  } else {
-    clearFieldError(nome);
-  }
+  } else { clearFieldError(nome); }
 
-  // Telefone
   const phoneErr = validatePhone(whats);
   if (phoneErr) {
     showFieldError(whats, phoneErr);
     valid = false;
-  } else {
-    clearFieldError(whats);
-  }
+  } else { clearFieldError(whats); }
 
-  // Marca
   if (!marca.value.trim()) {
     showFieldError(marca, 'Informe o nome da marca');
     valid = false;
-  } else {
-    clearFieldError(marca);
-  }
+  } else { clearFieldError(marca); }
 
-  // Área
   if (!area.value) {
     showFieldError(area, 'Selecione uma área');
     valid = false;
-  } else {
-    clearFieldError(area);
-  }
+  } else { clearFieldError(area); }
 
   if (!valid) return;
 
   const brandName = marca.value.trim();
+  const areaVal   = area.value;
 
-  // Go to loading stage
-  document.getElementById('stage-form').style.display = 'none';
+  // Vai para etapa de loading
+  document.getElementById('stage-form').style.display    = 'none';
   document.getElementById('stage-loading').style.display = 'block';
   document.getElementById('loading-brand-name').textContent = '"' + brandName + '"';
 
-  // Animate steps
   const steps = [
     { el: document.getElementById('step1'), spinner: document.getElementById('spinner1'), check: document.getElementById('check1') },
     { el: document.getElementById('step2'), spinner: document.getElementById('spinner2'), check: document.getElementById('check2') },
@@ -1587,37 +1849,42 @@ function submitLeadForm() {
   ];
 
   steps.forEach(s => {
-    s.el.classList.remove('active', 'done');
-    s.check.style.display = 'none';
+    s.el.classList.remove('active','done');
+    s.check.style.display   = 'none';
     s.spinner.style.display = 'none';
   });
 
-  function activateStep(i) {
-    if (i >= steps.length) {
-      setTimeout(() => showResult(brandName), 400);
+  // Dispara fetch para o Worker simultaneamente à animação
+  const fetchPromise = fetch(
+    WORKER_URL + '/busca?marca=' + encodeURIComponent(brandName) + '&area=' + encodeURIComponent(areaVal)
+  ).then(r => r.json()).catch(() => null);
+
+  // Anima os 3 passos (timing fixo para UX)
+  let stepIndex = 0;
+  function nextStep() {
+    if (stepIndex >= steps.length) {
+      // Animação terminou — espera o fetch se ainda não voltou
+      fetchPromise.then(dados => showResult(brandName, dados));
       return;
     }
-    const s = steps[i];
+    const s = steps[stepIndex++];
     s.el.classList.add('active');
     s.spinner.style.display = 'block';
-
     setTimeout(() => {
       s.spinner.style.display = 'none';
-      s.check.style.display = 'block';
+      s.check.style.display   = 'block';
       s.el.classList.add('done');
-      activateStep(i + 1);
-    }, 800 + i * 350);
+      nextStep();
+    }, 900 + stepIndex * 300);
   }
-
-  // Slight delay before first step animates in
-  setTimeout(() => activateStep(0), 200);
+  setTimeout(nextStep, 200);
 }
 
-function showResult(name) {
+/* Renderiza o resultado — dados reais do INPI ou fallback */
+function showResult(name, dados) {
   document.getElementById('stage-loading').style.display = 'none';
-  document.getElementById('stage-result').style.display = 'block';
+  document.getElementById('stage-result').style.display  = 'block';
 
-  const r = Math.random();
   const resultEl = document.getElementById('search-result');
   const badge    = document.getElementById('result-badge');
   const title    = document.getElementById('result-title');
@@ -1625,35 +1892,87 @@ function showResult(name) {
   const tag      = document.getElementById('result-brand-tag');
 
   resultEl.className = 'search-result';
-  tag.textContent = name;
+  tag.textContent    = name;
 
-  if (r < 0.7) {
-    resultEl.classList.add('result-ok');
-    badge.textContent = 'Disponível';
-    title.textContent = 'Nenhum registro idêntico encontrado';
-    note.textContent = 'A marca "' + name + '" não apresenta conflito direto na base do INPI. Porém podem existir marcas semelhantes na mesma classe — recomendamos uma análise completa antes do protocolo.';
-  } else if (r < 0.9) {
-    resultEl.classList.add('result-warn');
-    badge.textContent = 'Atenção';
-    title.textContent = 'Encontramos marcas semelhantes';
-    note.textContent = 'Há registros com similaridade a "' + name + '" na base do INPI. Isso pode dificultar a aprovação dependendo da classe. Uma análise profissional pode identificar alternativas viáveis.';
+  // Remove tabela anterior se existir
+  const oldTable = document.getElementById('result-table');
+  if (oldTable) oldTable.remove();
+
+  if (dados && dados.ok) {
+    // ——— RESULTADO REAL DO INPI ———
+    const v = dados.veredicto;
+
+    if (v === 'conflito') {
+      resultEl.classList.add('result-danger');
+      badge.textContent = 'Conflito detectado';
+      title.textContent = 'Marca idêntica já registrada no INPI';
+      note.textContent  = 'Encontramos um registro ativo com o nome "' + name + '" na base do INPI para o seu segmento. Registrar essa marca pode ser indeferida. Nosso especialista pode avaliar alternativas e estratégias viáveis.';
+    } else if (v === 'atencao') {
+      resultEl.classList.add('result-warn');
+      badge.textContent = 'Pedido ativo';
+      title.textContent = 'Já existe um pedido em andamento no INPI';
+      note.textContent  = 'Há um processo em análise para a marca "' + name + '" no INPI. Dependendo da classe, isso pode impactar o seu registro. Recomendamos uma análise detalhada antes de protocolar.';
+    } else if (v === 'semelhante') {
+      resultEl.classList.add('result-warn');
+      badge.textContent = 'Marcas semelhantes';
+      title.textContent = 'Encontramos marcas com nomes parecidos';
+      note.textContent  = 'Não há registro idêntico a "' + name + '", mas existem marcas semelhantes no INPI. O examinador pode considerar conflito dependendo da classe. Uma análise especializada aumenta suas chances de aprovação.';
+    } else {
+      // livre ou disponivel
+      resultEl.classList.add('result-ok');
+      badge.textContent = 'Sem conflitos diretos';
+      title.textContent = 'Nenhum registro idêntico encontrado';
+      note.textContent  = dados.total === 0
+        ? 'A marca "' + name + '" não aparece na base do INPI para o seu segmento. As chances de aprovação são boas — um especialista pode confirmar e iniciar o protocolo.'
+        : 'A marca "' + name + '" não apresenta conflito direto na base do INPI. Há ' + dados.total + ' registro(s) com nomes próximos, mas nenhum idêntico na sua classe. Recomendamos análise antes do protocolo.';
+    }
+
+    // Tabela com os resultados encontrados (máx 5)
+    if (dados.resultados && dados.resultados.length > 0) {
+      const wrap = document.createElement('div');
+      wrap.id = 'result-table';
+      wrap.innerHTML = '<p class="result-table-label">Registros encontrados na base do INPI:</p>' +
+        '<div class="result-rows">' +
+        dados.resultados.slice(0,5).map(r =>
+          '<div class="result-row">' +
+          '<span class="rr-marca">' + escHtml(r.marca) + '</span>' +
+          '<span class="rr-status rr-' + r.status + '">' + escHtml(r.situacao) + '</span>' +
+          '<span class="rr-titular">' + escHtml(r.titular || '—') + '</span>' +
+          '</div>'
+        ).join('') +
+        '</div>';
+      document.getElementById('search-result').appendChild(wrap);
+    }
+
+    // Adiciona badge "dados reais INPI"
+    const src = document.createElement('p');
+    src.className = 'result-fonte';
+    src.textContent = 'Consulta realizada na base pública do INPI — ' + new Date().toLocaleDateString('pt-BR');
+    document.getElementById('search-result').appendChild(src);
+
   } else {
-    resultEl.classList.add('result-danger');
-    badge.textContent = 'Risco alto';
-    title.textContent = 'Registro idêntico ou muito semelhante detectado';
-    note.textContent = 'Encontramos um registro muito similar a "' + name + '" na base do INPI. Recomendamos análise profissional urgente para avaliar suas opções e estratégia de registro.';
+    // ——— FALLBACK se o worker falhou ———
+    resultEl.classList.add('result-warn');
+    badge.textContent = 'Análise preliminar';
+    title.textContent = 'Não foi possível consultar o INPI agora';
+    note.textContent  = 'O sistema do INPI está temporariamente indisponível. Nosso especialista fará a busca completa e entra em contato com você em até 24h com o resultado detalhado.';
   }
 
   document.getElementById('stage-result').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
 function resetSimulator() {
-  document.getElementById('stage-result').style.display = 'none';
+  document.getElementById('stage-result').style.display  = 'none';
   document.getElementById('stage-loading').style.display = 'none';
-  document.getElementById('stage-form').style.display = 'block';
-  // Clear fields
+  document.getElementById('stage-form').style.display    = 'block';
   ['f-nome','f-whats','f-marca'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('f-area').selectedIndex = 0;
+  const oldTable = document.getElementById('result-table');
+  if (oldTable) oldTable.remove();
 }
 
 /* --- FAQ accordion --- */

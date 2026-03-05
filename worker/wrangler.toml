@@ -1,0 +1,9 @@
+name = "lomazy-inpi"
+main = "worker.js"
+compatibility_date = "2024-01-01"
+
+[vars]
+# Sem variáveis secretas necessárias — a base do INPI é pública
+
+# Limites de segurança (plano gratuito)
+# 100.000 requisições/dia — mais que suficiente para landing page
