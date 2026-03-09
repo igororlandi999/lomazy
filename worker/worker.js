@@ -1,6 +1,6 @@
 /**
- * LOMAZY — Cloudflare Worker v13
- * Parser reescrito com regex corretos para o HTML real do INPI
+ * LOMAZY — Cloudflare Worker v14 — PRODUÇÃO
+ * Parser completo e testado com dados reais do INPI
  */
 
 const CORS = {
@@ -52,9 +52,7 @@ function normalizarSituacao(raw) {
   return { status: 'atencao', label: raw.trim().slice(0, 40) };
 }
 
-function ws(s) {
-  return s.replace(/\s+/g, ' ').trim();
-}
+function ws(s) { return s.replace(/\s+/g, ' ').trim(); }
 
 function getCookies(resp) {
   const out = [];
@@ -78,28 +76,17 @@ function mergeCookies(...arrays) {
 
 async function obterSessao() {
   const h = { 'User-Agent': UA, 'Accept': 'text/html,application/xhtml+xml', 'Accept-Language': 'pt-BR,pt;q=0.9' };
-
-  const r1 = await fetch(`${BASE}/pePI/servlet/LoginController?action=GoToPage&pageName=Marcas`, {
-    redirect: 'manual', headers: h,
-  });
+  const r1 = await fetch(`${BASE}/pePI/servlet/LoginController?action=GoToPage&pageName=Marcas`, { redirect: 'manual', headers: h });
   const c1 = getCookies(r1);
-
   const r2 = await fetch(`${BASE}/pePI/servlet/LoginController?action=login`, {
     redirect: 'follow',
-    headers: { ...h,
-      'Referer': `${BASE}/pePI/servlet/LoginController?action=GoToPage&pageName=Marcas`,
-      'Cookie': c1.join('; '),
-    },
+    headers: { ...h, 'Referer': `${BASE}/pePI/servlet/LoginController?action=GoToPage&pageName=Marcas`, 'Cookie': c1.join('; ') },
   });
   const c2 = getCookies(r2);
   const cookie2 = mergeCookies(c1, c2);
-
   const r3 = await fetch(`${BASE}/pePI/jsp/marcas/Pesquisa_classe_basica.jsp`, {
     redirect: 'follow',
-    headers: { ...h,
-      'Referer': `${BASE}/pePI/servlet/LoginController?action=login`,
-      'Cookie': cookie2,
-    },
+    headers: { ...h, 'Referer': `${BASE}/pePI/servlet/LoginController?action=login`, 'Cookie': cookie2 },
   });
   const c3 = getCookies(r3);
   return mergeCookies(c1, c2, c3);
@@ -107,67 +94,71 @@ async function obterSessao() {
 
 function parseINPI(html, marcaBuscada) {
   const resultados = [];
-
-  // Extrai blocos <tr>...</tr> individualmente
   const trRe = /<tr\b[^>]*>([\s\S]*?)<\/tr>/gi;
   let tr;
 
   while ((tr = trRe.exec(html)) !== null) {
     const bloco = tr[1];
 
-    // Número: link com 7-10 dígitos ou célula com "-" (alto renome)
+    // Número: link com dígitos OU célula com "-" (alto renome sem processo)
     const numMatch = bloco.match(/<a\b[^>]*>\s*(\d{7,10})\s*<\/a>/)
                   || bloco.match(/<td[^>]*>\s*(-)\s*<\/td>/);
     if (!numMatch) continue;
     const numero = numMatch[1];
 
     // Marca: texto dentro de <b>
-    const marcaMatch = bloco.match(/<b>\s*[\r\n\s]*([\w\s\-&\.\u00C0-\u00FF]+?)[\r\n\s]*<\/b>/i);
+    const marcaMatch = bloco.match(/<b>\s*[\r\n\s]*([^\r\n<]{1,80}?)[\r\n\s]*<\/b>/i);
     if (!marcaMatch) continue;
     const marca = ws(marcaMatch[1]);
-    if (!marca || marca.length < 2) continue;
+    if (!marca || marca.length < 1) continue;
 
-    // Situação: td com class "left padding-5"
-    const sitMatch = bloco.match(/class="left padding-5"[^>]*>[\s\S]*?<font[^>]*>([\s\S]*?)<\/font>/i);
+    // Situação: td.left.padding-5 OU alt do img de situação (alto renome)
+    const sitMatch = bloco.match(/class="left padding-5"[^>]*>[\s\S]*?<font[^>]*>([\s\S]*?)<\/font>/i)
+                  || bloco.match(/alt="([^"]+)"/i);
     const situacaoRaw = sitMatch ? ws(sitMatch[1]) : '';
 
-    // Titular: font com class "titular-marcas"
+    // Titular
     const titMatch = bloco.match(/class="normal titular-marcas">([\s\S]*?)<\/font>/i);
     const titular = titMatch ? ws(titMatch[1]) : '';
 
-    // Classe: font com class "titulo-marcas"
+    // Classe
     const clsMatch = bloco.match(/class="normal titulo-marcas">([\s\S]*?)<\/font>/i);
     const classe = clsMatch ? ws(clsMatch[1]) : '';
 
     const { status, label } = normalizarSituacao(situacaoRaw);
-
     resultados.push({ numero, marca: marca.toUpperCase(), situacao: label, status, titular, classe });
   }
 
   const norm = marcaBuscada.toLowerCase().trim();
+
+  // Veredicto baseado em correspondência exata de nome
   const identicas   = resultados.filter(r => r.marca.toLowerCase().trim() === norm && r.status === 'registrada');
   const emAndamento = resultados.filter(r => r.marca.toLowerCase().trim() === norm && r.status === 'atencao');
   const semelhantes = resultados.filter(r => r.marca.toLowerCase().includes(norm) && r.status === 'registrada');
+  const totalAtivos = resultados.filter(r => r.status !== 'disponivel').length;
 
-  const veredicto = resultados.length === 0 ? 'disponivel'
-    : identicas.length   > 0 ? 'conflito'
-    : emAndamento.length > 0 ? 'atencao'
-    : semelhantes.length > 0 ? 'semelhante' : 'livre';
+  let veredicto;
+  if      (identicas.length > 0)   veredicto = 'conflito';
+  else if (emAndamento.length > 0) veredicto = 'atencao';
+  else if (semelhantes.length > 0) veredicto = 'semelhante';
+  else if (resultados.length === 0) veredicto = 'disponivel';
+  else                              veredicto = 'livre';
 
-  return { veredicto, total: resultados.length, resultados: resultados.slice(0, 8) };
+  return {
+    veredicto,
+    total: resultados.length,
+    total_ativos: totalAtivos,
+    resultados,
+  };
 }
 
 async function buscarMarca(marca, classe, cookie) {
   for (const exata of ['sim', 'nao']) {
     const body = new URLSearchParams({
-      buscaExata:      exata,
-      txt:             '',
-      marca:           marca,
-      classeInter:     classe || '',
-      registerPerPage: '20',
-      botao:           'pesquisar',
-      Action:          'searchMarca',
-      tipoPesquisa:    'BY_MARCA_CLASSIF_BASICA',
+      buscaExata: exata, txt: '', marca,
+      classeInter: classe || '', registerPerPage: '50',
+      botao: 'pesquisar', Action: 'searchMarca',
+      tipoPesquisa: 'BY_MARCA_CLASSIF_BASICA',
     });
 
     const resp = await fetch(`${BASE}/pePI/servlet/MarcasServletController`, {
@@ -179,10 +170,8 @@ async function buscarMarca(marca, classe, cookie) {
         'Content-Type': 'application/x-www-form-urlencoded',
         'Origin': BASE,
         'Referer': `${BASE}/pePI/jsp/marcas/Pesquisa_classe_basica.jsp`,
-        'Sec-Fetch-Dest': 'document',
-        'Sec-Fetch-Mode': 'navigate',
-        'Sec-Fetch-Site': 'same-origin',
-        'Sec-Fetch-User': '?1',
+        'Sec-Fetch-Dest': 'document', 'Sec-Fetch-Mode': 'navigate',
+        'Sec-Fetch-Site': 'same-origin', 'Sec-Fetch-User': '?1',
         'Upgrade-Insecure-Requests': '1',
         'Cookie': cookie,
       },
@@ -204,7 +193,7 @@ export default {
     const url = new URL(request.url);
 
     if (url.pathname === '/') {
-      return new Response(JSON.stringify({ ok: true, servico: 'Lomazy INPI v13' }), { headers: CORS });
+      return new Response(JSON.stringify({ ok: true, servico: 'Lomazy INPI v14' }), { headers: CORS });
     }
 
     if (url.pathname === '/debug') {
@@ -212,32 +201,8 @@ export default {
         const marca  = url.searchParams.get('marca') || 'natura';
         const classe = url.searchParams.get('classe') || '';
         const cookie = await obterSessao();
-        const body = new URLSearchParams({
-          buscaExata: 'sim', txt: '', marca,
-          classeInter: classe, registerPerPage: '20',
-          botao: 'pesquisar', Action: 'searchMarca',
-          tipoPesquisa: 'BY_MARCA_CLASSIF_BASICA',
-        });
-        const resp = await fetch(`${BASE}/pePI/servlet/MarcasServletController`, {
-          method: 'POST', redirect: 'follow',
-          headers: {
-            'User-Agent': UA, 'Accept': 'text/html,application/xhtml+xml',
-            'Accept-Language': 'pt-BR,pt;q=0.9',
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'Origin': BASE,
-            'Referer': `${BASE}/pePI/jsp/marcas/Pesquisa_classe_basica.jsp`,
-            'Sec-Fetch-Dest': 'document', 'Sec-Fetch-Mode': 'navigate',
-            'Sec-Fetch-Site': 'same-origin', 'Sec-Fetch-User': '?1',
-            'Upgrade-Insecure-Requests': '1', 'Cookie': cookie,
-          },
-          body: body.toString(),
-        });
-        const html = await resp.text();
-        const dados = parseINPI(html, marca);
-        return new Response(JSON.stringify({
-          servico: 'v13', http_status: resp.status,
-          html_len: html.length, parse_result: dados,
-        }), { headers: CORS });
+        const dados  = await buscarMarca(marca, classe, cookie);
+        return new Response(JSON.stringify({ servico: 'v14', ...dados }), { headers: CORS });
       } catch (e) {
         return new Response(JSON.stringify({ erro: e.message }), { headers: CORS });
       }

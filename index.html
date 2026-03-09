@@ -13,9 +13,9 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --black: #1a1a1e;
-  --black2: #212126;
-  --black3: #26262c;
+  --black: #141416;
+  --black2: #18181b;
+  --black3: #1e1e22;
   --orange: #ff6a00;
   --orange-light: #ff8533;
   --orange-dim: rgba(255, 106, 0, 0.15);
@@ -50,6 +50,195 @@ body {
   z-index: 0;
   pointer-events: none;
   opacity: 0.4;
+}
+
+/* ===========================
+   SOBRE A LOMAZY
+=========================== */
+#sobre {
+  background: var(--black);
+  border-top: 1px solid var(--border);
+}
+
+.sobre-layout {
+  display: flex;
+  gap: 80px;
+  align-items: flex-start;
+}
+
+@media (max-width: 860px) {
+  .sobre-layout { flex-direction: column; gap: 48px; }
+}
+
+.sobre-texto {
+  flex: 1.2;
+  min-width: 0;
+}
+
+.sobre-desc {
+  font-size: 15px;
+  color: var(--gray-light);
+  line-height: 1.75;
+  margin-bottom: 16px;
+}
+
+.sobre-responsavel {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  margin-top: 40px;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid rgba(255,106,0,0.2);
+  background: var(--black3);
+  min-height: 280px;
+}
+
+.sobre-foto-wrap {
+  flex-shrink: 0;
+  width: 220px;
+  position: relative;
+  background: var(--orange);
+  overflow: hidden;
+}
+
+/* Fundo geométrico laranja */
+.sobre-foto-wrap::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(135deg, #ff6a00 0%, #cc4400 100%);
+  z-index: 0;
+}
+
+/* Polígono decorativo */
+.sobre-foto-wrap::after {
+  content: '';
+  position: absolute;
+  bottom: -30px;
+  left: -30px;
+  width: 180px;
+  height: 180px;
+  background: rgba(0,0,0,0.15);
+  transform: rotate(20deg);
+  border-radius: 20px;
+  z-index: 1;
+}
+
+.sobre-foto {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+  display: block;
+}
+
+.sobre-info {
+  flex: 1;
+  padding: 32px 32px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+}
+
+.sobre-cargo {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--orange);
+  margin-bottom: 2px;
+}
+
+.sobre-nome {
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--white);
+  line-height: 1.05;
+  margin-bottom: 12px;
+}
+
+.sobre-role {
+  font-size: 14px;
+  color: var(--gray-light);
+  line-height: 1.6;
+  max-width: 340px;
+}
+
+@media (max-width: 600px) {
+  .sobre-responsavel { flex-direction: column; }
+  .sobre-foto-wrap { width: 100%; height: 260px; }
+  .sobre-info { padding: 24px; }
+  .sobre-nome { font-size: 26px; }
+}
+
+.sobre-cargo {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--orange);
+  margin-bottom: 4px;
+}
+
+.sobre-nome {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--white);
+  margin-bottom: 4px;
+}
+
+.sobre-role {
+  font-size: 13px;
+  color: var(--gray);
+}
+
+/* Números / stats */
+.sobre-numeros {
+  flex: 0 0 280px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+@media (max-width: 860px) {
+  .sobre-numeros { flex: none; width: 100%; flex-direction: row; flex-wrap: wrap; }
+  .sobre-num-item { flex: 1 1 48%; }
+}
+
+.sobre-num-item {
+  padding: 28px 28px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sobre-num-item:last-child { border-bottom: none; }
+
+.sobre-num {
+  font-family: var(--font-display);
+  font-size: 36px;
+  font-weight: 800;
+  color: var(--orange);
+  line-height: 1;
+}
+
+.sobre-num-label {
+  font-size: 12px;
+  color: var(--gray);
+  line-height: 1.5;
 }
 
 /* ===========================
@@ -707,7 +896,7 @@ h1 em {
   color: rgba(255,255,255,0.3);
   margin: 20px 0 8px;
 }
-.result-rows { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+.result-rows { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; max-height: 280px; overflow-y: auto; padding-right: 4px; }
 .result-row {
   display: grid;
   grid-template-columns: 1fr 110px 1fr;
@@ -836,22 +1025,145 @@ section {
 =========================== */
 #how { background: var(--black); }
 
-.steps {
+.steps--two {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 0;
   position: relative;
+  max-width: 700px;
+  margin: 0 auto 64px;
 }
 
-.steps::before {
+.steps--two::before {
   content: '';
   position: absolute;
   top: 36px;
-  left: calc(16.66% + 24px);
-  right: calc(16.66% + 24px);
+  left: calc(25% + 24px);
+  right: calc(25% + 24px);
   height: 1px;
   background: linear-gradient(to right, var(--orange), rgba(255,106,0,0.3), var(--orange));
 }
+
+/* Passo 3 — destaque */
+.step-final {
+  display: flex;
+  align-items: center;
+  gap: 56px;
+  background: rgba(255,106,0,0.04);
+  border: 1px solid rgba(255,106,0,0.15);
+  border-radius: 16px;
+  padding: 48px 52px;
+  margin-top: 0;
+}
+
+@media (max-width: 820px) {
+  .steps--two { grid-template-columns: 1fr; max-width: 360px; }
+  .steps--two::before { display: none; }
+  .step-final { flex-direction: column; padding: 32px 24px; gap: 36px; }
+}
+
+.step-final-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.step-final-num {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--orange);
+  margin-bottom: 8px;
+}
+
+.step-final-title {
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  margin-bottom: 14px;
+  line-height: 1.1;
+}
+
+.step-final-desc {
+  font-size: 15px;
+  color: var(--gray-light);
+  line-height: 1.7;
+  margin-bottom: 20px;
+}
+
+.step-final-desc strong { color: var(--white); }
+
+.step-final-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.step-final-list li {
+  font-size: 13px;
+  color: var(--gray);
+  padding-left: 20px;
+  position: relative;
+}
+
+.step-final-list li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 7px;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--orange);
+  opacity: 0.6;
+}
+
+/* Imagem do certificado */
+.step-final-img {
+  flex: 0 0 280px;
+}
+
+@media (max-width: 820px) {
+  .step-final-img { flex: 0 0 auto; width: 100%; max-width: 280px; margin: 0 auto; }
+}
+
+.cert-frame {
+  position: relative;
+  border-radius: 10px;
+  overflow: visible;
+  filter: drop-shadow(0 12px 40px rgba(0,0,0,0.5));
+}
+
+.cert-img {
+  width: 100%;
+  border-radius: 8px;
+  display: block;
+  border: 2px solid rgba(255,255,255,0.08);
+}
+
+.cert-badge {
+  position: absolute;
+  bottom: -16px;
+  right: -16px;
+  background: var(--black3);
+  border: 1px solid var(--border-orange);
+  border-radius: 100px;
+  padding: 8px 16px 8px 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--orange-light);
+  white-space: nowrap;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+}
+
+
 
 .step {
   text-align: center;
@@ -1394,7 +1706,8 @@ footer {
       <h2 class="section-title">Três etapas para proteger<br>o que é seu</h2>
     </div>
 
-    <div class="steps fade-in">
+    <!-- Passos 1 e 2 -->
+    <div class="steps steps--two fade-in">
       <div class="step">
         <div class="step-num">
           <svg class="step-icon" viewBox="0 0 28 28" fill="none">
@@ -1415,14 +1728,36 @@ footer {
         <h3>Protocolo no INPI</h3>
         <p>Cuidamos de toda a documentação e protocolo do pedido de registro junto ao INPI, com a classe correta para seu negócio.</p>
       </div>
-      <div class="step">
-        <div class="step-num">
+    </div>
+
+    <!-- Passo 3 — destaque com certificado -->
+    <div class="step-final fade-in">
+      <div class="step-final-content">
+        <div class="step-num" style="margin: 0 0 24px 0;">
           <svg class="step-icon" viewBox="0 0 28 28" fill="none">
             <path d="M14 4L17 11H24L18.5 15.5L20.5 23L14 18.5L7.5 23L9.5 15.5L4 11H11L14 4Z" stroke="#ff6a00" stroke-width="1.5" stroke-linejoin="round"/>
           </svg>
         </div>
-        <h3>Acompanhamento até a aprovação</h3>
-        <p>Monitoramos o processo e respondemos eventuais exigências do INPI até a concessão final do certificado de registro.</p>
+        <p class="step-final-num">Etapa 03</p>
+        <h3 class="step-final-title">Acompanhamento até a aprovação</h3>
+        <p class="step-final-desc">Monitoramos todo o processo e respondemos eventuais exigências do INPI. No final, você recebe o <strong>Certificado de Registro de Marca</strong> — o documento oficial que garante a exclusividade do seu nome.</p>
+        <ul class="step-final-list">
+          <li>Validade de 10 anos, renovável indefinidamente</li>
+          <li>Proteção em todo o território nacional</li>
+          <li>Documento emitido diretamente pelo INPI</li>
+        </ul>
+      </div>
+      <div class="step-final-img">
+        <div class="cert-frame">
+          <img src="certificado.png" alt="Certificado de Registro de Marca — INPI" class="cert-img">
+          <div class="cert-badge">
+            <svg viewBox="0 0 40 40" fill="none" width="22" height="22">
+              <circle cx="20" cy="20" r="18" stroke="#ff6a00" stroke-width="2"/>
+              <path d="M12 20l6 6 10-10" stroke="#ff6a00" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Certificado oficial INPI
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -1573,6 +1908,54 @@ footer {
         </button>
         <div class="faq-a">Sim. O registro de marca concedido pelo INPI tem validade em todo o território nacional, com duração de 10 anos, renovável por períodos iguais indefinidamente.</div>
       </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===========================
+     SOBRE A LOMAZY
+=========================== -->
+<section id="sobre">
+  <div class="section-inner">
+    <div class="sobre-layout fade-in">
+
+      <div class="sobre-texto">
+        <p class="section-label">Quem somos</p>
+        <h2 class="section-title">Proteção jurídica de marcas com<br>análise técnica especializada</h2>
+        <p class="sobre-desc">A Lomazy atua na proteção jurídica de marcas, auxiliando empresas e empreendedores a garantirem exclusividade e segurança no uso de seus nomes. Nosso trabalho envolve análise técnica e acompanhamento completo do processo de registro junto ao INPI.</p>
+        <p class="sobre-desc">Acreditamos que a marca é um dos principais ativos de um negócio — e tratamos cada pedido com o rigor que esse ativo merece.</p>
+
+        <div class="sobre-responsavel">
+          <div class="sobre-foto-wrap">
+            <img src="davi.png" alt="Davi Lima — Advogado especialista em propriedade intelectual" class="sobre-foto">
+          </div>
+          <div class="sobre-info">
+            <p class="sobre-cargo">Responsável técnico</p>
+            <p class="sobre-nome">Davi Lima</p>
+            <p class="sobre-role">Advogado especialista em propriedade intelectual, Davi conduz pessoalmente cada análise de viabilidade e acompanha os processos de registro junto ao INPI — garantindo rigor técnico e segurança jurídica em cada etapa.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="sobre-numeros">
+        <div class="sobre-num-item">
+          <span class="sobre-num">10+</span>
+          <span class="sobre-num-label">Anos de experiência em propriedade intelectual</span>
+        </div>
+        <div class="sobre-num-item">
+          <span class="sobre-num">500+</span>
+          <span class="sobre-num-label">Marcas registradas com sucesso</span>
+        </div>
+        <div class="sobre-num-item">
+          <span class="sobre-num">100%</span>
+          <span class="sobre-num-label">Acompanhamento até a concessão do certificado</span>
+        </div>
+        <div class="sobre-num-item">
+          <span class="sobre-num">INPI</span>
+          <span class="sobre-num-label">Processo oficial junto ao Instituto Nacional da Propriedade Industrial</span>
+        </div>
+      </div>
+
     </div>
   </div>
 </section>
@@ -1933,7 +2316,7 @@ function showResult(name, dados) {
       wrap.id = 'result-table';
       wrap.innerHTML = '<p class="result-table-label">Registros encontrados na base do INPI:</p>' +
         '<div class="result-rows">' +
-        dados.resultados.slice(0,5).map(r =>
+        dados.resultados.map(r =>
           '<div class="result-row">' +
           '<span class="rr-marca">' + escHtml(r.marca) + '</span>' +
           '<span class="rr-status rr-' + r.status + '">' + escHtml(r.situacao) + '</span>' +
