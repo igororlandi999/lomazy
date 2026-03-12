@@ -1441,6 +1441,14 @@ footer {
   .footer-links { align-items: flex-start; }
 }
 </style>
+   <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=AW-18011864797"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'AW-18011864797');
+</script>
 </head>
 <body>
 
@@ -2247,6 +2255,13 @@ function submitLeadForm() {
       area:     areaVal,
     })
   }).catch(() => {});
+
+   // Dispara conversão Google Ads
+gtag('event', 'conversion', {
+  'send_to': 'AW-18011864797/qlirCNzGwYccEN393IxD',
+  'value': 1.0,
+  'currency': 'BRL'
+});
 
   // Vai para etapa de loading
   document.getElementById('stage-form').style.display    = 'none';
